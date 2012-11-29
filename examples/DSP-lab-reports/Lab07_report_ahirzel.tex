@@ -1,0 +1,231 @@
+\documentclass{ajhlabreport}
+\usepackage{ajhdsp}
+
+\newcommand{\generatedfigw}[2]{
+	\includegraphics[width=#1\textwidth]{generated/#2.png}
+}
+
+\newcommand{\irplotfile}[2]{
+\pgfplotstableread{generated/#1.txt}{\datafromfilefragile}
+\centering
+\begin{tikzpicture}
+\begin{axis}[discrete ir, #2, height=1.5in, width=0.5\textwidth,
+% http://tex.stackexchange.com/questions/36442/aligning-subplots-in-a-pgfplots-figure
+yticklabel style={text width=2.35em,align=right},
+% http://tex.stackexchange.com/questions/51095/reduce-font-size-and-keep-label-position-in-bar-chart-using-pgf-tikz
+tick label style={font=\footnotesize},
+]
+\addplot table[x expr=\coordindex, y index=0] \datafromfilefragile;
+\end{axis}
+\end{tikzpicture}
+}
+
+\providecommand{\n}[0]{[n]}
+
+\setlength{\parindent}{0bp}
+
+\datedue{November 8, 2012}
+\class{EE4252}
+\submittedto{\href{mailto:yliu18@mtu.edu}{Yang Liu}}
+\pretitle{Lab 7 Report}
+\title{Applications of the FFT}
+\author{\href{mailto:ahirzel@mtu.edu}{Alex Hirzel}}
+
+\begin{document}
+\maketitle
+
+
+
+\chapter{Project 1: IDFT from DFT}
+
+\begin{table}[H]
+\centering
+% TODO: Find a better way to do this than hard-coding.
+\begin{tabular}{ccc}
+$x$        & $\mathtt{fft}(0.1 x)$  & $\mathtt{fft}(0.1 x^\star)$ \\
+\midrule
+$0$        & $18 - 4.5j$            & $18+4.5j$            \\
+$4 - 1j$   & $-3.5388 - 5.6554j$    & $-0.46116 - 6.6554j$ \\
+$8 - 2j$   & $-2.6882 - 2.2528j$    & $-1.3118 - 3.2528j$  \\
+$12 - 3j$  & $-2.3633 - 0.95309j$   & $-1.6367 - 1.9531j$  \\
+$16 - 4j$  & $-2.1625 - 0.14984j$   & $-1.8375 - 1.1498j$  \\
+$20 - 5j$  & $-2 + 0.5j$            & $-2 - 0.5j$          \\
+$24 - 6j$  & $-1.8375 + 1.1498j$    & $-2.1625 + 0.14984j$ \\
+$28 - 7j$  & $-1.6367 + 1.9531j$    & $-2.3633 + 0.95309j$ \\
+$32 - 8j$  & $-1.3118 + 3.2528j$    & $-2.6882 + 2.2528j$  \\
+$36 - 9j$  & $-0.46116 + 6.6554j$   & $-3.5388 + 5.6554j$
+\end{tabular}
+\caption{Values of $y_1$ and $y_2$ for $x = n(4+j), n \in [0,9]$.\label{tab:p1}}
+\end{table}
+%
+The rule for finding the \texttt{ifft} using only the \texttt{fft} operation is
+%
+\begin{equation*}
+\mathtt{myifft}(x) = \frac{[\mathtt{fft}(x^\star)]^\star}{N}
+\end{equation*}
+%
+where $x^\star$ is the complex conjugation operation. This relation is applied
+to a random set of data below with the output of \texttt{ifft} for comparison:
+%
+\begin{table}[H]
+\centering
+\pgfplotstabletypeset[col sep=comma, every head row/.style={after row=\midrule}]{generated/p1-inverses.txt}
+\end{table}
+%
+\noindent{}The built-in MATLAB \texttt{ifft} function agrees with
+\texttt{myifft} to very high precision.
+
+
+
+\newpage
+\chapter{Project 2: Filtering a Noisy ECG Signal}
+
+The DFT seems to be very effective in filtering out the $60\hertz$ noise, with
+reconstruction with $N=600$ being the most effective.
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p2-600}
+\caption{DFT of an ECG signal with $N=600$ and the $60\hertz$ component removed.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p2-1024}
+\caption{DFT of an ECG signal with $N=1024$ and the $60\hertz$ component removed.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p2-512}
+\caption{DFT of an ECG signal with $N=512$ and the $60\hertz$ component removed.}
+\end{figure}
+
+
+\newcommand{\answermark}[1]{\textbf{(#1)}}
+
+\newpage
+\chapter{Project 3: Decoding a Mystery Message}
+
+\answermark{a} The "mystery" message is displayed below. At face value, it seems
+to be a high-frequency signal riding on a low-frequency sinusoid.
+%
+\vspace{-0.1in}
+\begin{figure}[H]
+\centering
+\generatedfigw{0.8}{p3-mystery}
+\end{figure}
+\vspace{-0.1in}
+%
+\answermark{b} Upon closer inspection of the FFT of the signal, however, two
+anomalous frequency components are noted at the indices $n=14$ and $n=1386$.
+%
+\vspace{-0.1in}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[discrete ir, height=1.5in, width=\textwidth,
+% http://tex.stackexchange.com/questions/36442/aligning-subplots-in-a-pgfplots-figure
+yticklabel style={text width=2.35em,align=right},
+% http://tex.stackexchange.com/questions/51095/reduce-font-size-and-keep-label-position-in-bar-chart-using-pgf-tikz
+tick label style={font=\footnotesize},
+ylabel=$X_\text{DFT}\n$,xtick={14, 401, 999, 1386},
+xmax=1440, ymax=150,
+]
+\addplot table[x expr=\coordindex, y index=0] {generated/p3-mystery-dft.txt};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+\vspace{-0.1in}
+%
+These frequency components are four orders of magnitude stronger than the
+others. \answermark{c} These low-frequency components correspond to an analog
+frequency of $\pm 14/(1400 t_s)$. Eliminating these yields the following signal:
+%
+\begin{figure}[H]
+\centering
+\generatedfigw{0.8}{p3-mystery-corrected}
+\end{figure}
+%
+Upon cursory inspection, this signal doesn't seem to contain any useful
+information due to the presence of high-frequency noise between $n=401$ and
+$n=999$.  \answermark{d} \answermark{e} By zeroing out these frequency
+components and reconstructing the signal, we arrive at
+%
+\begin{figure}[H]
+\centering
+\generatedfigw{0.8}{p3-mystery-corrected2}
+\end{figure}
+which is a much more useful-seeming signal.
+
+
+
+\newpage
+\chapter{Project 4: Band-Limited Interpolation}
+
+\renewcommand{\labelenumi}{(\alph{enumi})}
+\begin{enumerate}
+%
+\item Yes, the sampling rate $S = 200\hertz$ is high enough to prevent aliasing
+because $x(t)$ has a largest frequency $f_\text{max}$ of only $75\hertz$.
+Leakage occurs, however, because the sampling range does not even include a full
+period of the underlying signal. The DFT does have a pair of nonzero samples at
+the correct frequency (as shown below), but this is essentially a matter of
+chance.
+%
+\begin{figure}[H]
+\centering
+\irplotfile{p4a-dft}{ylabel=$X_\text{DFT}\n$, xtick={5}, ytick={4}, xmax=8, ymin=-1, ymax=5}
+\end{figure}
+%
+This matches the analog signal because $f_0 = 200 \cdot 3 / 8 = 75$, but again
+this is a matter of chance because of the leakage. The following plot shows
+$f_1$ and $f_2$. They are approximately equal (up to machine roundoff error).
+%
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p4a-both}
+\end{figure}
+%
+\newpage
+%
+\item Yes, the sampling rate $S = 400\hertz$ is high enough to prevent aliasing
+because $x(t)$ has a largest frequency $f_\text{max}$ of only $75\hertz$.
+Leakage occurs, however, because the sampling range does not even include a full
+period of the underlying signal. The DFT does not consist of a simple pair of
+nonzero samples; this is not unexpected.
+%
+\begin{figure}[H]
+\centering
+\irplotfile{p4b-dft}{ylabel=$X_\text{DFT}\n$, xtick={5}, ytick={2.7979}, xmax=8, ymin=-1, ymax=5}
+\end{figure}
+%
+Reconstructing this signal will result in a complicated sinusoid that does not
+resemble the original signal. The cause of this is the fact that the samples
+taken of the signal do not represent a full period of the underlying signal.
+Also, the samples chosen are not symmetric, so they have a DC value which is a
+zero-frequency component in the frequency domain. Qualitatively, this messes
+\emph{everything} up.
+%
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p4b-both}
+\end{figure}
+%
+\item Leakage.
+%
+\end{enumerate}
+
+
+
+\newpage
+\chapter{Appendix: MATLAB Source Code}
+
+What follows is a listing of the MATLAB source code (\autoref{lst:source-code}
+and \autoref*{lst:plotecg-m}) used to generate the figures and other information
+presented in this report.
+
+\lstinputlisting[caption={The MATLAB script used for this report, \texttt{Lab07\_ahirzel.m}.},label={lst:source-code},style=MATLABcode]{Lab07_ahirzel.m}
+\lstinputlisting[caption={The MATLAB script used to plot the ECG plots shown in this report, \texttt{plotecg.m}.},label={lst:plotecg-m},style=MATLABcode]{plotecg.m}
+
+\end{document}

@@ -1,0 +1,275 @@
+\documentclass{ajhlabreport}
+\usepackage{ajhdsp}
+\usepackage{verbatim}
+\usetikzlibrary{pgfplots.groupplots}
+
+\newcommand{\generatedfigw}[2]{
+	\includegraphics[width=#1\textwidth]{generated/#2.png}
+}
+
+\providecommand{\n}[0]{[n]}
+
+\datedue{November 1, 2012}
+\class{EE4252}
+\submittedto{\href{mailto:yliu18@mtu.edu}{Yang Liu}}
+\pretitle{Lab 6 Report}
+\title{The DFT and FFT}
+\author{\href{mailto:ahirzel@mtu.edu}{Alex Hirzel}}
+
+\begin{document}
+\maketitle
+
+
+
+\chapter{Project 1: Sampling a Combination of Sinusoids}
+
+This project investigates the sampling of the following signal at multiple
+rates.
+%
+\begin{align}
+x(t) = \sin{(200 \pi t)} + \sin{(480 \pi t)}
+\label{eq:p1-system}
+\end{align}
+%
+MATLAB was used to determine whether aliasing occurs at the indicated sample
+rate. MATLAB was also used to calculate the minimum number of samples required
+to eliminate leakage ($N_\text{min}$). This data is shown below.
+%
+\newcommand{\B}[1]{{\color{blue}#1}}
+\newcommand{\R}[1]{{\color{red}#1}}
+\newcommand{\X}[2]{${#1}^\text{fig \ref{fig:p1-#2}}$}
+%
+\begin{table}[H]
+\centering
+\begin{tabular}{ccccc}
+%
+$S$          & Aliasing? & $N_\text{min}$     & $3N_\text{min}$    & $3N_\text{min} + 1$   \\
+\midrule
+$1700\hertz$ & no        & \X{85}{1700-85}    & \X{255}{1700-255}  & \X{\B{263}}{1700-263} \\
+$360\hertz$  & yes       & \X{\R{18}}{360-18} & \X{\R{54}}{360-54} & \X{\R{62}}{360-62}    \\
+$120\hertz$  & yes       & \X{\R{6}}{120-6}   & \X{\R{18}}{120-18} & \X{\R{26}}{120-26}    \\
+$50\hertz$   & yes       & \X{\R{5}}{50-5}    & \X{\R{15}}{50-15}  & \X{\R{23}}{50-23}
+%
+\end{tabular}
+\end{table}
+%
+\noindent{}Numbers typeset in color indicate combinations of sampling rate and
+DFT size that will not result in identical reconstruction (i.e. $x(t) \ne
+x_\text{r}(t)$ due to \R{aliasing if red} or \B{leakage if blue}). Required
+plots are shown in figures \ref{fig:p1-1700}, \ref{fig:p1-360}, \ref{fig:p1-120}
+and \ref{fig:p1-50}. Questions (c), (f) and (g) from the lab hand-out are
+addressed in the figure captions.
+
+\newcommand{\irplotfile}[2]{
+\pgfplotstableread{generated/#1.txt}{\datafromfilefragile}
+\centering
+\begin{tikzpicture}
+\begin{axis}[discrete ir, #2, height=1.5in, width=\textwidth,
+% http://tex.stackexchange.com/questions/36442/aligning-subplots-in-a-pgfplots-figure
+yticklabel style={text width=2.35em,align=right},
+% http://tex.stackexchange.com/questions/51095/reduce-font-size-and-keep-label-position-in-bar-chart-using-pgf-tikz
+tick label style={font=\footnotesize},
+]
+\addplot table[x expr=\coordindex, y index=0] \datafromfilefragile;
+\end{axis}
+\end{tikzpicture}
+}
+
+\begin{figure}[H]\centering
+% 1700 Hz   n=85
+\subbottom[The $85$-point DFT of $x(t)$ sampled at $1700\hertz$ shows peaks at
+analog frequencies of $\pm100\hertz$ and $\pm240\hertz$ as expected. This is
+because the sampling frequency is high enough and the DFT window captures an
+integral number of periods of the underlying sinusoids.\label{fig:p1-1700-85}
+]{\irplotfile{dft1700-min}{ylabel=$X_\text{DFT}\n$,xtick={5, 12, 73, 80},
+ytick={0, 42.5}, xmax=87, ymax=50}}
+% 1700 Hz   n=255
+\subbottom[The $255$-point DFT of $x(t)$ sampled at $1700\hertz$. The commentary
+from \autoref{fig:p1-1700-85} (above) applies to this case as
+well.\label{fig:p1-1700-255}
+]{\irplotfile{dft1700-3min}{ylabel=$X_\text{DFT}\n$,xtick={15, 36, 219,
+240}, ytick={0, 127.5}, xmax=261, ymax=150}}
+% 1700 Hz   n=263
+\subbottom[The $263$-point DFT of $x(t)$ sampled at $1700\hertz$ shows peaks at
+many analog frequencies near $\pm100\hertz$ and $\pm240\hertz$. This is expected
+due to leakage.\label{fig:p1-1700-263}
+]{\irplotfile{dft1700-3min8}{ylabel=$X_\text{DFT}\n$,xtick={15.462, 37.109,
+225.738, 247.385}, ytick={0, 89.834, 126.93}, xmax=269, ymax=150}}
+%
+\caption{Sampling system \eqref{eq:p1-system} at $1700\hertz$.\label{fig:p1-1700}}
+\end{figure}
+
+\begin{figure}[H]\centering
+% 360 Hz   n=18
+\subbottom[The $18$-point DFT of $x(t)$ sampled at $360\hertz$ shows peaks at
+$\pm100\hertz$ and $\mp120\hertz$. These are as expected because the $240\hertz$
+frequency component in the original signal is aliased and phase-reversed
+(because $240\hertz - 360\hertz = -120\hertz$).\label{fig:p1-360-18}
+]{\irplotfile{dft360-min}{ylabel=$X_\text{DFT}\n$,xtick={5, 6, 12, 13},
+ytick={0, 9}, xmax=18.25, ymax=12}}
+% 360 Hz   n=54
+\subbottom[The $54$-point DFT of $x(t)$ sampled at $360\hertz$. The commentary
+from \autoref{fig:p1-360-18} (above) applies to this case as
+well.\label{fig:p1-360-54}
+]{\irplotfile{dft360-3min}{ylabel=$X_\text{DFT}\n$,xtick={15, 18, 36, 39},
+ytick={0, 27}, xmax=54.75, ymax=35}}
+% 360 Hz   n=62
+\subbottom[The $62$-point DFT of $x(t)$ sampled at $360\hertz$ shows peaks at
+many analog frequencies near $\pm100\hertz$ and $\mp120\hertz$. This is expected
+due to leakage.\label{fig:p1-360-62}
+]{\irplotfile{dft360-3min8}{ylabel=$X_\text{DFT}\n$,xtick={17.222, 20.666,
+41.333, 44.777}, ytick={0, 14.207, 24.627, 27.858}, xmax=62.75, ymax=35}}
+%
+\caption{Sampling system \eqref{eq:p1-system} at $360\hertz$.\label{fig:p1-360}}
+\end{figure}
+
+\begin{figure}[H]\centering
+% 120 Hz   n=6
+\subbottom[The $6$-point DFT of $x(t)$ sampled at $120\hertz$ shows peaks at
+$\mp20\hertz$. These are as expected because the $240\hertz$ frequency component
+in the original signal is aliased to $0\hertz$ (with the DC value cancling out
+due to the even number of samples) and the $100\hertz$ component is aliased and
+phase-reversed to $-20\hertz$ (because $100\hertz - 120\hertz =
+-20\hertz$).\label{fig:p1-120-6}
+]{\irplotfile{dft120-min}{ylabel=$X_\text{DFT}\n$,xtick={1, 5}, ytick={0, 3},
+xmax=6.25, ymax=4}}
+% 120 Hz   n=18
+\subbottom[The $18$-point DFT of $x(t)$ sampled at $120\hertz$. The commentary
+from \autoref{fig:p1-120-6} (above) applies to this case as
+well.\label{fig:p1-120-18}
+]{\irplotfile{dft120-3min}{ylabel=$X_\text{DFT}\n$,xtick={3, 15}, ytick={0, 9},
+xmax=18.75, ymax=12}}
+% 120 Hz   n=26
+\subbottom[The $26$-point DFT of $x(t)$ sampled at $120\hertz$ shows peaks at
+many analog frequencies near $\mp20\hertz$. This is expected due to
+leakage.\label{fig:p1-120-26}
+]{\irplotfile{dft120-3min8}{ylabel=$X_\text{DFT}\n$,xtick={4.333, 21.666},
+ytick={0, 10.507, 5.6362}, xmax=26.75, ymax=15}}
+%
+\caption{Sampling system \eqref{eq:p1-system} at $120\hertz$.\label{fig:p1-120}}
+\end{figure}
+
+\begin{figure}[H]\centering
+% 50 Hz   n=5
+\subbottom[The $5$-point DFT of $x(t)$ sampled at $50\hertz$ shows peaks at
+$\mp10\hertz$. These are as expected because the $100\hertz$ frequency component
+in the original signal is aliased to $0\hertz$ (with the DC value canceling out
+due to the even number of samples) and the $240\hertz$ component is aliased and
+phase-reversed to $-10\hertz$ (because $240\hertz - 5\cdot50\hertz =
+-10\hertz$).\label{fig:p1-50-5}
+]{\irplotfile{dft50-min}{ylabel=$X_\text{DFT}\n$,xtick={1, 4}, ytick={0, 2.5},
+xmax=5.25, ymax=3}}
+% 50 Hz   n=15
+\subbottom[The $5$-point DFT of $x(t)$ sampled at $50\hertz$. The commentary
+from \autoref{fig:p1-50-5} (above) applies to this case as
+well.\label{fig:p1-50-15}
+]{\irplotfile{dft50-3min}{ylabel=$X_\text{DFT}\n$,xtick={3, 12}, ytick={0, 7.5},
+xmax=15.75, ymax=10}}
+% 50 Hz   n=23
+\subbottom[The $23$-point DFT of $x(t)$ sampled at $50\hertz$ shows peaks at
+many analog frequencies near $\mp10\hertz$. This is expected due to
+leakage.\label{fig:p1-50-23}
+]{\irplotfile{dft50-3min8}{ylabel=$X_\text{DFT}\n$,xtick={4.6, 18.4}, ytick={0,
+6.2332, 8.3148}, xmax=23.75, ymax=10}}
+%
+\caption{Sampling system \eqref{eq:p1-system} at $50\hertz$.\label{fig:p1-50}}
+\end{figure}
+
+
+
+\chapter{Project 2: Leakage ($200\hertz$)}
+
+
+\generatedfigw{1}{p2-200hz}
+\renewcommand{\labelenumi}{(\alph{enumi})}
+\begin{enumerate}
+\item Frequency components at $10\hertz$ and $60\hertz$ are expected. Aliasing
+does not occur in any plot because $f_s > 2 f_\text{max}$ (i.e. $200\hertz >
+2\cdot60\hertz$).
+\item No leakage occurs in plot $D_2$ because there is no "skirt" around
+frequency components in this plot.
+\item The remaining plots show leakage (i.e. $D_1$, $D_3$ and $D_4$). This is
+concluded because there are no sharp peaks at $10\hertz$ or $60\hertz$ in these
+plots.
+\item Plot $D_1$ has the longest duration of any of the plots mentioned in (c);
+this is because it is the most "sharp".
+\end{enumerate}
+\newpage
+
+
+
+\chapter{Project 2: Leakage ($100\hertz$)}
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p2-100hz}
+\end{figure}
+%
+\renewcommand{\labelenumi}{(\alph{enumi})}
+\begin{enumerate}
+%
+\item Frequency components at $10\hertz$ and $60\hertz$ are expected. Aliasing
+is visible in all plots because the $60\hertz$ frequency component is aliased to
+$40\hertz$ and phase-reversed. (This is because $60\hertz - 100\hertz =
+-40\hertz$.)
+%
+\item No leakage occurs in plot $D_2$ because there is no "skirt" around
+frequency components in this plot.
+%
+\item The remaining plots show leakage (i.e. $D_1$, $D_3$ and $D_4$). This is
+concluded because there are no sharp peaks at $10\hertz$ or $40\hertz$ in these
+plots.
+%
+\item Plot $D_1$ has the longest duration of any of the plots mentioned in (c);
+this is because it is the most "sharp".
+%
+\end{enumerate}
+\newpage
+
+
+
+\chapter{Project 3: Sampling a Chirp Signal}
+
+\renewcommand{\labelenumi}{(\alph{enumi})}
+\begin{enumerate}
+%
+\item The highest frequency present is $2048 \cdot 2 = 4096\hertz$, which will
+not be aliased by sampling at $8192\hertz$. The frequency seems to increase with
+time in a smooth way, eventually fading due to the nonlinearity of my human
+hearing.
+%
+\item The highest frequency present is $8192 \cdot 2 = 16384\hertz$, which will
+most certainly be aliased by sampling at $8192\hertz$. The frequency increases
+and decreases twice in $2\second$, which agrees with the above plot.
+%
+\item The below plot of \texttt{fa1} shows the frequency of the sound increases with
+time. My ears agree.
+\begin{figure}[H]
+\centering
+\generatedfigw{0.9}{p3-1}
+\end{figure}
+%
+\item The below plot of \texttt{fa2} shows the frequency of the sound oscillate
+twice. My ears agree.
+\begin{figure}[H]
+\centering
+\generatedfigw{0.9}{p3-2}
+\end{figure}
+%
+\end{enumerate}
+
+
+
+\newpage
+\chapter{Appendix: MATLAB Source Code}
+
+What follows is a listing of the MATLAB source code (\autoref{lst:source-code}
+and \autoref*{lst:mydftplot-m})---and the output of this code
+(\autoref{lst:diary-txt})---used to generate the figures and other information
+presented in this report.
+
+\lstinputlisting[caption={The MATLAB script used for this report, \texttt{Lab06\_ahirzel.m}.},label={lst:source-code},style=MATLABcode]{Lab06_ahirzel.m}
+\lstinputlisting[caption={The MATLAB script used to plot the DFTs shown in this report, \texttt{mydftplot.m}.},label={lst:mydftplot-m},style=MATLABcode]{mydftplot.m}
+\lstinputlisting[caption={The output of listing \ref{lst:source-code}, \texttt{diary.txt}.},label={lst:diary-txt}]{generated/diary.txt}
+
+\end{document}

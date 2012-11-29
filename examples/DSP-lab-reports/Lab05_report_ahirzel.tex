@@ -1,0 +1,197 @@
+\documentclass{ajhlabreport}
+\usepackage{multicol}
+\usepackage{ajhdsp}
+
+\newcommand{\generatedfigw}[2]{
+	\includegraphics[width=#1\textwidth]{generated/#2.png}
+}
+
+\providecommand{\n}[0]{[n]}
+
+\datedue{October 25, 2012}
+\class{EE4252}
+\submittedto{\href{mailto:yliu18@mtu.edu}{Yang Liu}}
+\pretitle{Lab 5 Report}
+\title{The DTFT}
+\author{\href{mailto:ahirzel@mtu.edu}{Alex Hirzel}}
+
+\begin{document}
+\maketitle
+
+%\chapter{Introduction}
+
+%TODO
+
+
+
+\chapter{Project 1(a): The Shift Property}
+
+\pgfplotstableread{
+3
+3
+3
+2
+2
+2
+1
+1
+1
+}\dataone
+
+\begin{figure}[H]
+%
+\subbottom[The signal $x\n = \smash{\{\marker{3}, 3, 3, 2, 2, 2, 1, 1, 1\}}$.\label{fig:p1-x}]{
+\begin{tikzpicture}
+\begin{axis}[discrete ir, half size, height=1in, xmax=8.25, ymax=3.4]
+\addplot table[x expr=\coordindex, y index=0] \dataone;
+\end{axis}
+\end{tikzpicture}
+}
+%
+\subbottom[The signal $y\n = \smash{\{3, 3, 3, 2, \marker{2}, 2, 1, 1, 1\}}$.\label{fig:p1-y}]{
+\begin{tikzpicture}
+\begin{axis}[discrete ir, half size, height=1in, xmin=-4.25, xmax=4.25, ymax=3.4, ylabel=$y\n$]
+\addplot table[x expr=\coordindex-4, y index=0] \dataone;
+\end{axis}
+\end{tikzpicture}
+}
+%
+\caption{Input signals $x[n]$ and $y[n]$ for Project 1. They are shifted
+versions of one another related by $y[n] = x[n - 4]$.\label{fig:p1-inputs}}
+\end{figure}
+
+Comparing $x[n]$ and $y[n]$ from \autoref{fig:p1-inputs},
+
+\newcommand{\inlinefigure}[1]{
+\begin{figure}[H]
+\centering
+\generatedfigw{0.9}{#1}
+\end{figure}
+}
+
+\renewcommand{\labelenumi}{(\alph{enumi})}
+\begin{enumerate}
+\item The magnitude spectra should be identical because the same frequencies are
+present in each signal; the only distinction between the signals in this respect
+is that each frequency component has peaks at different times; this amounts to a
+phase shift. The identicality of the magnitude spectra is shown by the below
+plot of $|X| - |Y|$, which has a $10^{-14}$ factor of scale on the $y$-axis.
+%
+\inlinefigure{p1a_magnitude}
+%
+\item The phase of the DFT of $x[n]$ will not be linear. This is due to the lack
+of symmetry\footnote{i.e. $x[n]$ is not the shifted version of a signal that is
+even or odd.} and is confirmed by the phase spectrum of $x[n]$ shown below.
+%
+\inlinefigure{p1a_phase}
+%
+\item The phase spectrum of $X$ does show jumps, but \texttt{unwrap} does not
+remove them all. Jumps remain which are less than $2\pi$ as shown below.
+%
+\inlinefigure{p1a_phase_unwrapped}
+%
+\item The phase spectra for $X$ and $Y$ are not and should not be equal. They
+should be related by a linear difference due to the group delay but will not be
+equal.
+\item Since the two signals are shifted version of one another in the discrete
+domain, they will have a constant group delay and so the below unwrapped plot of
+$\angle{X} - \angle{Y}$ is linear.
+%
+\inlinefigure{p1a_phase_diff}
+%
+\item From the plot above, delay can be found by calculating the slope. In this
+case, the slope is $\approx 25$ and $25/(2\pi) \approx 3.979$. This matches the
+discrete-domain delay which we know to be 4 samples.
+\end{enumerate}
+
+
+
+\chapter{Project 1(b): Periodicity, Convolution and Multiplication}
+
+\begin{enumerate}
+%
+\item $|X(F)|$ should be (and is) periodic with $N = 1$. This is because $X(F)$
+is generated from a discrete signal $x[n]$.
+%
+\inlinefigure{p1b_x}
+%
+\item $|X(F)|^2$ should be identical to $|G(F)|$ because $g[n] = x[n] \conv
+x[n]$ and because convolution in one domain translates to multiplication in
+another. The ratio of the below plots is 1.
+%
+\inlinefigure{p1b_xx_and_g}
+%
+\item $|Y_p(F)|$ and $|H(F)|$ are not identical (as shown below).
+%
+\inlinefigure{p1b_ypm_and_hm}
+%
+\item $|Y_p(F)|$ and $|H(F)|$ have a ratio of $\boxed{400}$.
+%
+\inlinefigure{p1b_ypm_over_hm}
+%
+\end{enumerate}
+
+
+
+\newpage
+\chapter{Project 1(c): Modulation}
+
+\inlinefigure{p1c}
+
+\begin{enumerate}
+%
+\item $|Y_1(F)|$ should (and does) consist of two half-height, shifted versions
+of $X(F)$ (because the time-domain multiplication of a rect $x[t]$ and a
+$\cos{(\cdots)}$ results in the convolution of a $\sinc{(\cdots)}$ and a pair of
+impulses in the frequency domain).
+%
+\item $|Y_1(F)|$ and $|Y_2(F)|$ should be (and are) identical because
+$\cos{(2.3n\pi)}$ aliases to $\cos{(0.3n\pi)}$ when $n$ is an integer.
+%
+\end{enumerate}
+
+
+
+\chapter{Project 2: The DTFT of Digital Filters}
+\begin{multicols}{3}
+\renewcommand{\labelenumi}{\arabic{enumi}.}
+\renewcommand{\labelenumii}{(\alph{enumii})}
+\begin{enumerate}
+%
+\item \begin{enumerate} \item lowpass  \item IIR \item nonlinear-phase \end{enumerate}
+%
+\item \begin{enumerate} \item bandstop \item IIR \item nonlinear-phase \end{enumerate}
+%
+\item \begin{enumerate} \item highpass \item FIR \item linear-phase    \end{enumerate}
+%
+\columnbreak
+%
+\item \begin{enumerate} \item bandpass \item IIR \item nonlinear-phase \end{enumerate}
+%
+\item \begin{enumerate} \item lowpass  \item IIR \item linear-phase    \end{enumerate}
+%
+\item \begin{enumerate} \item lowpass  \item IIR \item linear-phase    \end{enumerate}
+%
+\columnbreak
+%
+\item \begin{enumerate} \item allpass  \item IIR \item nonlinear-phase \end{enumerate}
+%
+\item \begin{enumerate} \item comb     \item FIR \item linear-phase    \end{enumerate}
+%
+\newpage
+%
+\end{enumerate}
+\end{multicols}
+
+
+
+\newpage
+\chapter{Appendix: MATLAB Source Code}
+
+What follows is a listing of the MATLAB source code (listing
+\ref{lst:source-code}) used to generate the figures and other information
+presented in this report.
+
+\lstinputlisting[caption={The MATLAB script used for this report, \texttt{Lab05\_ahirzel.m}.},label={lst:source-code},style=MATLABcode]{Lab05_ahirzel.m}
+
+\end{document}

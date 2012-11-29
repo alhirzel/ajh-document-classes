@@ -1,0 +1,215 @@
+\documentclass[dsp]{ajhlabreport}
+\usepackage{multirow,booktabs}
+
+\newcommand{\generatedfigw}[2]{
+	\includegraphics[width=#1\textwidth]{generated/#2.png}
+}
+
+\providecommand{\n}[0]{[n]}
+
+\datedue{October 11, 2012}
+\class{EE4252}
+\submittedto{Yang Liu}
+\pretitle{Lab 3 Report}
+\title{Discrete Convolution}
+\author{Alex Hirzel}
+
+\begin{document}
+
+\maketitle
+
+
+
+\chapter{Project 1}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p1_inputs}
+\caption{$x[n]$ (left) and $h[n]$ (right) used for convolution in Project 1.\label{fig:p1-inputs}}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\subbottom[The convolution result $y_1\n = x\n \conv h\n$.\label{fig:p1-y1}]{\generatedfigw{1}{p1_y1}}
+\subbottom[The convolution result $y_2\n = h\n \conv x\n$.\label{fig:p1-y2}]{\generatedfigw{1}{p1_y2}}
+\subbottom[The convolution result $y_3\n = x\n \conv x\n$.\label{fig:p1-y3}]{\generatedfigw{1}{p1_y3}}
+\subbottom[The convolution result $y_4\n = h\n \conv h\n$.\label{fig:p1-y4}]{\generatedfigw{1}{p1_y4}}
+\caption{The outputs from convolution in Project 1.\label{fig:p1}}
+\end{figure}
+
+The properties of convolution are verified using \autoref{fig:p1-inputs} as
+follows:
+%
+\begin{itemize}
+%
+\item{The \textbf{order property is confirmed} because \autoref{fig:p1-y1} and
+\autoref{fig:p1-y2} are identical;}
+%
+\item{The \textbf{length property is verified} by noting that
+\autoref{fig:p1-y1} and \autoref{fig:p1-y2} are equal in length;}
+%
+\item{The \textbf{sum property is verified} using \autoref{lst:diary-txt} by
+noting that $\sum x[n]=36$ and $\sum h[x]=0$ and that the lengths of $y_1 \cdots
+y_4$ are in agreement with the sum property (i.e. all are zero except $\sum y_3
+= 36^2 = 1296$).}
+%
+\end{itemize}
+%
+Additionally, symmetry of the outputs is observed as shown in the below table.
+%
+\begin{table}[H]
+\centering
+\begin{tabular}{r@{\ \ensuremath{\conv}\ }l@{\hspace{0.5in}}r@{\hspace{0.1in}i.e. }l}
+\multicolumn{2}{c@{\hspace{0.5in}}}{Input} & \multicolumn{2}{@{}c}{Output} \\
+\midrule
+even & odd  & even & $y_1$, $y_2$ \\
+odd  & odd  & odd  & $y_3$ \\
+even & even & even & $y_4$
+\end{tabular}
+\end{table}
+
+
+
+\newpage
+\chapter{Project 2}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The input and response ($x[n]$ and $y[n]$, respectively) are shown in
+\autoref{fig:p2}. \textbf{The period of both $x[n]$ and $y[n]$ is 10.} This
+makes sense because $h[n]$ is non-periodic and is an LTI system; this means a
+periodic input will result in an output that is periodic with the same
+frequency.
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p2}
+\caption{The input $x[n]$ and response $y[n]$ from Project 2.\label{fig:p2}}
+\end{figure}
+
+
+
+\newpage
+\chapter{Project 3}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Shown in \autoref{fig:p3} are the results of convolution as plotted from
+\autoref{lst:diary-txt}. Note that it is expected for $y_n[n] = y[n]$, which is
+seen to be true.
+
+\pgfplotsset{discrete ir/.append style={ytick={0,40,...,200}}}
+
+\pgfplotstableread{
+1
+5
+14
+30
+51
+75
+100
+117
+117
+98
+58
+27
+7
+}\dataone
+
+\pgfplotstableread{
+118
+122
+112
+88
+78
+82
+100
+}\datatwo
+
+\begin{figure}[H]
+\centering
+\providecommand{\n}[0]{[n]}
+%
+\subbottom[The convolution result $y_n\n = x\n \conv h\n$.\label{fig:p3-y1}]{
+\begin{tikzpicture}
+\begin{axis}[discrete ir, ylabel=$y_n\n$, xmax=12.5, ymax=159]
+\addplot table[x expr=\coordindex, y index=0] {\dataone};
+\end{axis}
+\end{tikzpicture}
+}
+%
+\subbottom[The convolution result $y_p\n = x\n \convp h\n$.\label{fig:p3-y2}]{
+\begin{tikzpicture}
+\begin{axis}[discrete ir, ylabel=$y_p\n$, xmax=12.5, ymax=159]
+\addplot table[x expr=\coordindex, y index=0] {\datatwo};
+\end{axis}
+\end{tikzpicture}
+}
+%
+\subbottom[The periodic convolution of the padded versions of $x\n$ and $h\n$ is
+identical to $y_n$.\label{fig:p3-y3}]{
+\begin{tikzpicture}
+\begin{axis}[discrete ir, ylabel=$y\n$, xmax=12.5, ymax=159]
+\addplot table[x expr=\coordindex, y index=0] {\dataone};
+\end{axis}
+\end{tikzpicture}
+}
+%
+\caption{The outputs from convolution in Project 3.\label{fig:p3}}
+\end{figure}
+
+
+
+\newpage
+\chapter{Project 4}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+(The hard copy from \texttt{chirpgui} is shown in \autoref{fig:p4-gui} in the
+appendices.)
+
+\begin{itemize}
+\item{\autoref{fig:p4-y1} shows a bandpass filter with cutoff frequencies at
+approximately $F=0.05$ and $F=0.15$.}
+\item{\autoref{fig:p4-y2} shows a bandpass filter with an exponential drop-off
+(starting at approximately $F=0.05$ and trailing off at $F=0.4$.}
+\end{itemize}
+
+The above filter types were rendered by looking to the power-spectral density
+(plotted in the bottom left of each quad) and comparing against known filter
+types (such as high-pass, low-pass, notch, etc.).
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p4_linear_freq}
+\caption{Output signal versus time plot showing that frequency increases with time.\label{fig:p4-linear-freq}}
+\end{figure}
+
+\newpage
+
+\begin{figure}[H]
+\centering
+\subbottom[$h_1\n = \delta\n - 0.4\cos{(0.4 n \pi)} \sinc{(0.2n)}$.\label{fig:p4-y1}]{\generatedfigw{1}{p4_y1}}
+\subbottom[$h_2\n = 0.3 \sinc{(0.3 n)}$.\label{fig:p4-y2}]{\generatedfigw{1}{p4_y2}}
+\caption{Spectral information for the two systems under consideration in Project 4.\label{fig:p4-y}}
+\end{figure}
+
+
+
+\newpage
+\appendix
+
+\chapter{Appendix: Miscellaneous figures}
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{../p4_gui}
+\caption{Hard copy of \texttt{chirpgui} for Project 4.\label{fig:p4-gui}}
+\end{figure}
+
+
+\chapter{Appendix: MATLAB Source Code}
+
+What follows is a listing of the MATLAB source code (listing
+\ref{lst:source-code})---and the output of this code (listing
+\ref{lst:diary-txt})---used to generate the figures and other information
+presented in this report.
+
+\lstinputlisting[caption={The MATLAB script used for this report, \texttt{Lab03\_ahirzel.m}.},label={lst:source-code},style=MATLABcode]{Lab03_ahirzel.m}
+\lstinputlisting[caption={The output of listing \ref{lst:source-code}, \texttt{diary.txt}.},label={lst:diary-txt}]{generated/diary.txt}
+
+\end{document}

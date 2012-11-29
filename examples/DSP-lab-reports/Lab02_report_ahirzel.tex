@@ -1,0 +1,164 @@
+\documentclass{ajhlabreport}
+
+\newcommand{\marker}[1]{\ensuremath{\smash{\overset{\Downarrow}{#1}}}}
+
+\newcommand{\generatedfigw}[2]{
+	\includegraphics[width=#1\textwidth]{generated/#2.png}
+}
+
+\datedue{October 4, 2012}
+\class{EE4252}
+\submittedto{\href{mailto:yliu18@mtu.edu}{Yang Liu}}
+\pretitle{Lab 2 Report}
+\title{Discrete System Analysis}
+\author{\href{mailto:ahirzel@mtu.edu}{Alex Hirzel}}
+
+\begin{document}
+
+\maketitle
+
+\chapter{Project 1}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Considering the system \begin{align}
+y[n] - 0.49y[n-2] = x[n]
+\label{eq:sys1}
+\end{align} with $x[n] = 30(0.8)^n u[n]$, $y[-1] = 15$ and $y[-2] = 10$,
+
+%\begin{itemize}
+%\item The total response is shown in \autoref{fig:p1-total};
+%\item The zero-input response is shown in \autoref{fig:p1-zir};
+%\item The zero-state response is shown in \autoref{fig:p1-zsr}.
+%\end{itemize}
+
+\begin{figure}[H]
+\centering
+\subbottom[Total response.\label{fig:p1-total}]{   \generatedfigw{0.80}{p1_total}}
+\subbottom[Zero-input response.\label{fig:p1-zir}]{\generatedfigw{0.80}{p1_zir}}
+\subbottom[Zero-state response.\label{fig:p1-zsr}]{\generatedfigw{0.80}{p1_zsr}}
+\caption{The zero-input and zero-state responses for system \eqref{eq:sys1}.}
+\end{figure}
+
+
+
+\newpage
+\chapter{Project 2}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[t]
+\centering
+\generatedfigw{0.5}{p2_averaging_example}
+\caption{System \eqref{eq:sys2} applied to the data set $\left\{\marker{2}, 4,
+6, 8, 10, 12, 14, 16\right\}$ with output shown on the same
+plot.\label{fig:sys2-example}}
+\end{figure}
+
+In this case, the two-point averaging filter is
+\begin{align}
+y[n] = 0.5x[n] + 0.5x[n-1]
+\label{eq:sys2}
+\end{align} or $h[n] = \{\marker{0.5},0.5\}$, which agrees with the requested
+MATLAB output in \autoref{lst:diary-txt}. As an example, the effect of system
+\eqref{eq:sys2} is shown in \autoref{fig:sys2-example}. In general, an
+$N$-point averaging filter has an impulse response of \[
+%
+\boxed{
+\text{$N$-point averaging filter: }
+\underbrace{\left\{\marker{\frac{1}{N}}, \frac{1}{N}, \cdots, \frac{1}{N},
+\frac{1}{N}\right\}}_\text{$N$ terms in length}
+\quad\text{or}\quad
+h[n] = \frac{1}{N} \sum_{i=0}^{N-1} \delta[n-i]
+}
+%
+\text{.} \] For example, with $N = 4$ the filter will be a 4-point averaging
+filter and can be expressed as \[
+%
+\boxed{
+\text{$4$-point averaging filter: }
+\left\{\marker{\tfrac{1}{4}}, \tfrac{1}{4}, \tfrac{1}{4},
+\tfrac{1}{4}\right\}
+\quad\text{or}\quad
+h[n]=\tfrac{1}{4}\delta[n] +
+\tfrac{1}{4}\delta[n-1] + \tfrac{1}{4}\delta[n-2] + \tfrac{1}{4}\delta[n-3]
+}
+%
+\text{.} \]
+%
+When an averaging filter is used, the output signal is affected in two ways:
+\begin{enumerate}
+\item{\textbf{Time shift} - the filter adds a $t_s (N - 1)/2$ time lag due to
+the causal nature of the filter. Specifically, this is because the filter cannot
+make use of samples that occur in the future with respect to a given position.
+Because of this, any given point in the output is the result of the algorithm
+using the $N - 1$ previous samples and the "current" sample (for $N$ samples in
+total). This range of samples is centered $(N - 1)/2$ samples in the past,
+making the output appear $(N - 1)/2$ samples "too late".}
+\item{\textbf{Attenuation} - the output of the filter can be reduced by the
+averaging process. The attenuation factor at a given time $T$ in the original
+signal can be approximated (excluding discretation effects) by \begin{align}
+%
+\mathrm{att}_T(T) &\approx \frac{1}{x(T)} \int_{T - t_s(N-1)/2}^{T + t_s(N-1)/2} x(t) \dif{t} \text,
+\label{eq:attenuation-factor-T}
+%
+\end{align} which is the mean signal value over the averaging region of the
+filter. This can be put in terms of $n$ and the original signal as
+follows:\footnote{This is which is a differential equation---still in terms of
+$x(t)$!---that I don't want to expand any further. That said, one could now
+write $x(t)$ in terms of both $x[n]$ and $\mathrm{att}_n(n)$, convert to a
+discrete-time summation instead of an integration and arrive at an enormously
+practical result. In practice, the original signal is often the desired output
+from a system with this attenuation. This so-called "reverse averaging" problem
+is difficult. After all, it boils down to deconvolution! I think this is the
+right start, though.}\begin{align}
+%
+\mathrm{att}_n(n) &= \mathrm{att}_T\left(n t_s - \smash{\overbrace{t_s[N-1]/2}^\text{time shift}}\right) \notag \\
+                  &= \mathrm{att}_T\left(-t_s[N-2n-1]/2\right)
+\approx \smash{
+    \frac{\displaystyle{\int_{-t_s(N-n-1)}^{T + n t_s} x(t) \dif{t}}}{x(n t_s - t_s[N-1]/2)} \notag
+}\text.
+\label{eq:attenuation-factor-n}
+%
+\end{align}
+}
+\end{enumerate}
+
+
+\newpage
+\section{Averaging a noisy sinusoid}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The requested plots are shown and described in
+\autoref{fig:p2-sinusoid-correlated} and \autoref{fig:p2-sinusoid-filtered}. The
+attenuation is adjusted by using a factor of 0.75732, which would change the
+\texttt{b} coefficient to $1/200/0.75732=0.0066$ instead of $0.005$.
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p2_sinusoid_filtered}
+\caption{Original sinusoid (in dashed black), the original sinusoid with noise
+added (in black) and the output of the 20-point averaging filter (in
+{\color{green}green}) with noise shown isolated in
+{\color{red}red}.\label{fig:p2-sinusoid-filtered}}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\generatedfigw{1}{p2_sinusoid_correlated}
+\caption{Original signal (in dashed black) shown with colocated filter output
+(in {\color{blue}blue}). The filter output is attenuated from the pure original
+sinusoid by a factor of $0.75732$ and offset horizontally by a shift of $10t_s$.
+The isolated noise from \autoref{fig:p2-sinusoid-filtered} is also shown (in
+{\color{red}red}) for reference.\label{fig:p2-sinusoid-correlated}}
+\end{figure}
+
+
+\newpage
+\appendix
+\chapter{Appendix: MATLAB Source Code}
+
+What follows is a listing of the MATLAB source code (listing
+\ref{lst:source-code})---and the output of this code (listing
+\ref{lst:diary-txt})---used to generate the figures and other information
+presented in this report.
+
+\lstinputlisting[caption={The MATLAB script used for this report, \texttt{Lab02\_ahirzel.m}.},label={lst:source-code},style=MATLABcode]{Lab02_ahirzel.m}
+\lstinputlisting[caption={The output of listing \ref{lst:source-code}, \texttt{diary.txt}.},label={lst:diary-txt}]{generated/diary.txt}
+
+\end{document}

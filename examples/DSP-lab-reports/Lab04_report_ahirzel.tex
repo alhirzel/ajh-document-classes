@@ -1,0 +1,156 @@
+\documentclass{ajhlabreport}
+\usepackage{ajhdsp}
+\usepackage{verbatim}
+
+\newcommand{\generatedfigw}[2]{
+	\includegraphics[width=#1\textwidth]{generated/#2.png}
+}
+
+\providecommand{\n}[0]{[n]}
+
+\datedue{October 18, 2012}
+\class{EE4252}
+\submittedto{\href{mailto:yliu18@mtu.edu}{Yang Liu}}
+\pretitle{Lab 4 Report}
+\title{The $z$-transform and its applications}
+\author{\href{mailto:ahirzel@mtu.edu}{Alex Hirzel}}
+
+\begin{document}
+\maketitle
+
+
+
+\chapter{Project 1}
+
+The results of \texttt{ztr} and \texttt{izt} matched expectations; this can be
+confirmed by referring to \autoref{lst:diary-txt} and noting the final symbolic
+representations are equivalent to the inputs. That is to say,
+\[ \verb|(5*(2 .^n)).*ustep(n)|             \equiv 5 (2)^n u(n) \]
+and
+\[ \verb|(5*(2 .^n)-3*((-1).^n)).*ustep(n)| \equiv 5 (2)^n u(n) - 3 (-1)^n u(n)\text{.} \]
+
+\begin{figure}[H]
+\centering
+\subbottom[Total response of system A.\label{fig:p1-a-total}]{\generatedfigw{0.45}{p1_2a_total}}
+\subbottom[Impulse response of system A.\label{fig:p1-a-ir}]{\generatedfigw{0.45}{p1_2a_ir}}
+\subbottom[Total response of system B.\label{fig:p1-b-total}]{\generatedfigw{0.45}{p1_2b_total}}
+\subbottom[Impulse response of system B.\label{fig:p1-b-ir}]{\generatedfigw{0.45}{p1_2b_ir}}
+\caption{The outputs from convolution in Project 1.\label{fig:p1}}
+\end{figure}
+
+The estimated steady-state value for system A is 0.6.
+
+
+
+\newpage
+\chapter{Project 2}
+
+An FIR filter was created to attempt to remove the $60\hertz$ noise from the ECG
+signal. Zeroes were placed at the locations in the $z$-plane corresponding to the
+$60\hertz$ component when sampled at $300\hertz$. That is to say, conjugate
+zeroes were placed at $F = \pm 60/300=0.2$ on the unit circle, resulting in
+\begin{align}
+%
+H_\text{FIR}(z) = \frac{1}{(z-e^{j 2\pi 60/300})(z-e^{-j 2\pi 60/300})}
+\text.
+\label{eq:p2-fir}
+%
+\end{align} The output of this filter is shown in \autoref{fig:p2-fir}. A sister
+filter was designed by placing zeroes very near to these poles to reduce
+overshoot. This is an IIR filter because the representation of $h[n]$ (not
+shown) has only an infinite representation. \begin{align}
+%
+H_\text{IIR}(z) = \frac{(z - 0.99 e^{j 2\pi 60/300})(z - 0.99 e^{-j 2\pi 60/300})}{(z - e^{j 2\pi 60/300})(z - e^{-j 2\pi 60/300})}
+\text.
+\label{eq:p2-iir}
+%
+\end{align} The output of this IIR filter is shown in \autoref{fig:p2-iir}. Note
+that there is a \emph{ringing} present at start-up which damps out over less
+than a quarter period. This ringing can be traded for overshoot by manipulating
+the radial distance of the poles\footnote{that is to say, the closer the poles
+are to the unit circle, the less overshoot and more ringing is present; when the
+poles are moved further from the unit circle, ringing is reduced but overshoot
+is increased.}. Finally, an averaging filter was developed with a width of
+$360/60=5$ samples in hopes that it would eliminate the sinusoidal corruption.
+The output from this filter is shown in \autoref{fig:p2-ma}.
+
+\begin{figure}[H]
+\centering
+\subbottom[Pole-zero plot of \autoref{eq:p2-fir}.\label{fig:p2-fir-pz}]{
+%
+\begin{tikzpicture}
+\begin{axis}[pz plot]
+\addplot[data cs=polar,mark=o] coordinates { (60/300*180,1) (-60/300*180,1) };
+\end{axis}
+\end{tikzpicture}
+%
+}
+\subbottom[Pole-zero plot of \autoref{eq:p2-iir}.\label{fig:p2-iir-pz}]{
+%
+\begin{tikzpicture}
+\begin{axis}[pz plot]
+\addplot[data cs=polar,mark=o] coordinates { (60/300*180,1)   (-60/300*180,1) };
+\addplot[data cs=polar,mark=x] coordinates { (60/300*180,0.9) (-60/300*180,0.9) };
+\end{axis}
+\end{tikzpicture}
+%
+}
+\caption{Pole-zero plots of the FIR and IIR filters.\label{fig:p2-pz}}
+\end{figure}
+
+
+\subsection{Conclusions}
+
+Of all approaches to filtering the $60\hertz$ noise, it must be said that the
+moving average was all-round most effective except for the phase lag of 2.5
+samples. If the end application of this filter cannot tolerate this distortion
+the next best choice is the IIR filter assuming the visible ringing on start-up
+can be ignored. (Refer to \autoref{fig:p2-iir} on the left-hand side to view the
+ringing.)
+
+\begin{figure}[p]
+\centering
+\subbottom[Filtering the ECG signal with an FIR filter, \autoref{eq:p2-fir}.\label{fig:p2-fir}]{\generatedfigw{1}{p2_fir}}
+\subbottom[Filtering the ECG signal with an IIR filter, \autoref{eq:p2-iir}.\label{fig:p2-iir}]{\generatedfigw{1}{p2_iir}}
+\subbottom[Filtering the ECG signal with a traditional moving average filter with 5 samples.\label{fig:p2-ma}]{\generatedfigw{1}{p2_ma}}
+\caption{Various filtering techniques applied to an ECG signal contaminated
+with $60\hertz$ noise.\label{fig:p2}}
+\end{figure}
+
+
+
+\newpage
+\chapter{Project 3}
+
+Note that since $S=8192\hertz$, $\tau$ is equivalent to 768 samples (and
+$2\tau$ to 1536 samples), so in the $z$-domain, \begin{align*}
+%
+c(t) &= s(t) + \alpha_1 s(t - \tau) + \alpha_2 s(t - 2\tau) \\
+%
+\therefore\ 
+C(z) &= S(z) + 0.9z^{-768} S(z) + 0.8z^{-1536} S(z)
+%
+\end{align*} and so the transfer function of the system can be found and inverted \begin{align*}
+%
+H(z)          &= \frac{C(z)}{S(z)} = \frac{1}{1 + 0.9z^{-768} + 0.8z^{-1536}}\text{,} \\
+%
+H_\text{I}(z) &= [H(z)]^{-1} = 1 + 0.9z^{-768} + 0.8z^{-1536}\text{.}
+%
+\end{align*} Applying this filter to the corrupted signal results in a
+computerized voice stating \[\boxed{\text{\textbf{"DSP is fun"},}}\] a statement with
+which this author generally agrees.
+
+
+
+\newpage
+\chapter{Appendix: MATLAB Source Code}
+
+What follows is a listing of the MATLAB source code (listing
+\ref{lst:source-code})---and the output of this code (listing
+\ref{lst:diary-txt})---used to generate the figures and other information
+presented in this report.
+
+\lstinputlisting[caption={The MATLAB script used for this report, \texttt{Lab04\_ahirzel.m}.},label={lst:source-code},style=MATLABcode]{Lab04_ahirzel.m}
+\lstinputlisting[caption={The output of listing \ref{lst:source-code}, \texttt{diary.txt}.},label={lst:diary-txt}]{generated/diary.txt}
+
+\end{document}
