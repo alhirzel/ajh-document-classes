@@ -34,3 +34,7 @@ Lab08_report_ahirzel.pdf, Lab08_report_ahirzel.tex
 --------------------------------------------------
 An elegant Bode plot in Project 2.
 
+Lab09_report_ahirzel.pdf, Lab09_report_ahirzel.tex
+--------------------------------------------------
+Another elegant set of Bode plots.
+
