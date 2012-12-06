@@ -1,0 +1,250 @@
+\documentclass{ajhlabreport}
+\usepackage{ajhdsp}
+
+\newcommand{\generatedfigw}[2]{
+	\includegraphics[width=#1\textwidth]{generated/#2.png}
+}
+
+\setlength{\parindent}{0bp}
+
+\datedue{December 6, 2012}
+\class{EE4252}
+\submittedto{\href{mailto:yliu18@mtu.edu}{Yang Liu}}
+\pretitle{Lab 9 Report}
+\title{IIR Filters}
+\author{\href{mailto:ahirzel@mtu.edu}{Alex Hirzel}}
+
+\begin{document}
+\maketitle
+
+
+
+
+\chapter{Project 1: Basic Routines for Digital Filter Design}%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{Exercise 1: IIR Filter Design}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[H]
+\centering
+\generatedfigw{0.8}{../p1e1}
+\caption{Hard copy of \texttt{dfdiir} showing the design of the desired filter.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[continuous fr, height=3in, width=5in,
+% http://tex.stackexchange.com/questions/36442/aligning-subplots-in-a-pgfplots-figure
+yticklabel style={text width=2.35em,align=right},
+% http://tex.stackexchange.com/questions/51095/reduce-font-size-and-keep-label-position-in-bar-chart-using-pgf-tikz
+tick label style={font=\footnotesize},
+xlabel={$f$ ($\hertz$)},
+xtick={1000,2000,3000,4000,5000},
+xmax=5100,
+ylabel=$H(f)$,
+ymax=1.1,
+]
+\addplot table[col sep=comma,x index=0, y index=1] {generated/p1e1.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Plot of $\abs{H(f)}$ versus frequency in $\hertz$.}
+\end{figure}
+
+
+
+\newpage
+\section{Exercise 2: s2z mappings}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{enumerate}[(a)]
+%
+\item The results of converting $H(s) = 1/(s + 2)$ are:
+\begin{align*}
+H_0(z) = \frac{0.1967 z}{z - 0.6065}
+\qquad
+H_1(z) = \frac{0.1967 z}{z - 0.6065}
+\qquad
+H_2(z) = \frac{0.1 - 0.1 z}{z - 0.6}
+\end{align*}
+\item All filters are overplotted below.
+\begin{figure}[H]\centering\generatedfigw{0.9}{p1e2-magnitudes}\end{figure}
+%
+\item It can be seen from above that $H_1(z)$ from above most closely matches
+$H(s)$. This is because the red and blue lines are closer to one another than
+the blue and teal lines.
+%
+\item Shown below are their impulse responses $h_{1\{0,1,2\}}[n]$.
+\begin{align*}
+H_{10}(z) &= \frac{0.1967 z}{z - 0.6065}
+&
+h_{10}[n] &= 0.19673 (0.6065)^n u[n]
+\\
+H_{11}(z) &= \frac{0.9837 z + 0.9837}{z - 0.6065}
+&
+h_{11}[n] &= 0.26056 (0.6065)^n u[n] - 0.16219 \delta[n]
+\\
+H_{12}(z) &= \frac{0.1 - 0.1 z}{z - 0.6}
+&
+h_{12}[n] &= 0.32438 (0.6065)^n u[n] - 0.32438 \delta[n]
+\end{align*}
+\begin{figure}[H]
+\begin{tikzpicture}
+\begin{axis}[discrete ir,
+xmin=-0.00001, ymax=0.4,
+width=\textwidth, height=2.5in]
+\addplot { 0.19673 * (0.6065^x) };
+\addplot { 0.26056 * (0.6065^x) - 0.16219 * floor(1/(1+x)) };
+\addplot { 0.32438 * (0.6065^x) - 0.32438 * floor(1/(1+x)) };
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+%
+\end{enumerate}
+
+
+
+
+\newpage
+\chapter{Project 2: GUI-Based Digital Filter Design}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The impulse invariant and bilinear transform Butterworth designs produced by
+\texttt{diirgui} are:
+
+\begin{align*}
+H_\text{II}(z) &= \frac{0.0005238 z^{10} + 0.02412 z^8 + 0.09109 z^6 + 0.01531 z^4 - 0.006237 z^2 - 0.001179}{z^{10} + 2.811 z^8 + 3.432 z^6 + 2.216 z^4 + 0.746 z^2 + 0.1038} \\
+H_\text{Bi}(z) &= \frac{0.03047 z^6 - 0.0914 z^4 + 0.0914 z^2 - 0.03047}{z^6 + 1.483 z^4 + 0.9296 z^2 + 0.2033}
+\end{align*}
+
+Each filter design meets specs. The two yield filters that are \emph{not} the
+same order. The filter designed via the bilinear transform is more economical
+with order six rather than ten.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[height=2.5in, width=5in,
+grid,no marks,
+axis x line = bottom,
+xlabel = {Digital frequency, $F$},
+xtick = {0.1,0.2,0.3,0.4,0.5},
+xmin = 0, xmax = 0.52,
+axis y line = left,
+ylabel = {Filter attenuation, $20\log{\abs{H(z)}}$ ($\deci\bel$)},
+ymin = -50, ymax = 2,
+]
+\addplot table[col sep=comma,x index=0, y index=1] {generated/p2-butt.csv};
+\addplot table[col sep=comma,x index=0, y index=2] {generated/p2-butt.csv};
+\node[coordinate,pin=above left:{\color{red}$-30.28\deci\bel$}] at (axis cs:0.1,-30.2770) {};
+\node[coordinate,pin=below right:{\color{blue}$-31.75\deci\bel$}] at (axis cs:0.1,-31.7521) {};
+\legend{$H_\text{Bi}(z)$, $H_\text{II}(z)$}
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+The Chebyshev filters also have different orders (eight and six, respectively,
+for the impulse invariant and bilinear transform designs). Both designs still
+meet specs. The filter designed via the bilinear transform is more economical
+with order six rather than eight.
+
+\begin{align*}
+H_\text{II}(z) &= \frac{-z^8 - 3.067 z^6 - 3.837 z^4 - 2.29 z^2 - 0.5474}{0.001235 z^8 - 0.005121 z^6 - 0.04221 z^4 - 0.0116 z^2 - 0.0003102} \\
+H_\text{Bi}(z) &= \frac{z^6 + 2.138 z^4 + 1.769 z^2 + 0.5398}{0.01147 z^6 - 0.03442 z^4 + 0.03442 z^2 - 0.01147}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[height=2.5in, width=5in,
+grid,no marks,
+axis x line = bottom,
+xlabel = {Digital frequency, $F$},
+xtick = {0.1,0.2,0.3,0.4,0.5},
+xmin = 0, xmax = 0.52,
+axis y line = left,
+ylabel = {Filter attenuation, $20\log{\abs{H(z)}}$ ($\deci\bel$)},
+ymin = -50, ymax = 2,
+]
+\addplot table[col sep=comma,x index=0, y index=1] {generated/p2-cheb.csv};
+\addplot table[col sep=comma,x index=0, y index=2] {generated/p2-cheb.csv};
+\node[coordinate,pin=above left:{\color{red}$-39.00\deci\bel$}] at (axis cs:0.1,-39.0450) {};
+\node[coordinate,pin=right:{\color{blue}$-41.42\deci\bel$}] at (axis cs:0.1,-43.4200) {};
+\legend{$H_\text{Bi}(z)$, $H_\text{II}(z)$}
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+
+
+
+\chapter{Project 3: A Digital Audio Equalizer}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The response varies as an equalizer would be expected to work: there are five
+controllable peaks corresponding to the \texttt{g} input to \texttt{audioeq},
+and the flattest response was found using \texttt{audioeq(0.5, [1 1 1 0.5
+2.1])}. The passband ripple is on the order of $1\deci\bel$.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[height=2.5in, width=5in,
+grid,no marks,
+axis x line = bottom,
+xlabel = {Digital frequency, $F$},
+xtick = {0.1,0.2,0.3,0.4,0.5},
+xmin = 0, xmax = 0.52,
+axis y line = left,
+ylabel = {Filter attenuation, $20\log{\abs{H(z)}}$ ($\deci\bel$)},
+ymin = -10, ymax = 10,
+]
+\addplot table[col sep=comma,x index=0, y index=1] {generated/p3-flattest.csv};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+
+
+
+\chapter{Project 4: Stability of IIR Filters}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{enumerate}[(a)]
+%
+\item The result is approximately
+\begin{align*}
+H(z) \approx \frac{10^{-7} (1.103 z^5 + 1.125 z^4 - 2.163 z^3 - 2.207 z^2 + 1.06 z + 1.082)}{z^5 - 4.736 z^4 + 8.969 z^3 - 8.488 z^2 + 4.015 z - 0.7594}\text.
+\end{align*}
+%
+\setcounter{enumi}{2}
+\item The bode plot is shown below. The truncated version is shown in
+{\color{red}red}.
+\begin{figure}[H]\centering\generatedfigw{0.9}{p4}\end{figure}
+%
+\item The numerator of both $H(z)$ and $H_T(z)$ have zeroes that are on the unit
+circle (magnitude 1.000002633680229). For the purposes of this analysis, then,
+the filter will be minimum-phase if denominator poles are inside the unit
+circle. In the case of $H(z)$, all poles are inside the unit circle, so $H(z)$
+is stable and minimum-phase.
+%
+\item $H_T(z)$ has the same numerator as $H(z)$, but the denominator of $H_T(z)$
+has a pole that is outside the unit circle. Therefore, $H_T(z)$ is not stable
+nor is it minimum-phase.
+%
+\item Truncation to 9 significant figures results in a stable filter (which is
+therefore minimum-phase). Expectedly, truncation to 5 significant figures
+results in a filter that is even less stable than $H_T(z)$ (i.e. pole radius is
+even larger), a non-minimum-phase result.
+%
+\end{enumerate}
+
+
+\newpage
+\chapter{Appendix: MATLAB Source Code}
+
+What follows is a listing of the MATLAB source code (\autoref{lst:source-code})
+and the text output of this code (\autoref{lst:diary-txt}) used to generate the
+figures and other information presented in this report.
+
+\lstinputlisting[caption={The MATLAB script used for this report, \texttt{Lab09\_ahirzel.m}.},label={lst:source-code},style=MATLABcode]{Lab09_ahirzel.m}
+\lstinputlisting[caption={The output of listing \ref{lst:source-code}, \texttt{diary.txt}.},label={lst:diary-txt}]{generated/diary.txt}
+
+\end{document}
