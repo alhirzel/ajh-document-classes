@@ -1,0 +1,132 @@
+\documentclass{ajhlabreport}
+\usepackage{ajhdsp}
+\usetikzlibrary{pgfplots.groupplots}
+
+\newcommand{\generatedfigw}[2]{
+	\includegraphics[width=#1\textwidth]{generated/#2.png}
+}
+
+\setlength{\parindent}{0bp}
+
+\datedue{December 13, 2012}
+\class{EE4252}
+\submittedto{\href{mailto:yliu18@mtu.edu}{Yang Liu}}
+\pretitle{Lab 10 Report}
+\title{FIR Filters}
+\author{\href{mailto:ahirzel@mtu.edu}{Alex Hirzel}}
+
+\begin{document}
+\maketitle
+
+
+
+
+\chapter{Project 1: GUI-Based FIR Filter Design}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[discrete ir, height=2.75in, width=6.5in,
+% http://tex.stackexchange.com/questions/36442/aligning-subplots-in-a-pgfplots-figure
+yticklabel style={text width=2.35em,align=right},
+% http://tex.stackexchange.com/questions/51095/reduce-font-size-and-keep-label-position-in-bar-chart-using-pgf-tikz
+tick label style={font=\footnotesize},
+ylabel=$H(f)$,
+% http://tex.stackexchange.com/questions/54350/how-can-i-change-format-of-numbers-axis-on-pgfplots
+every y tick label/.append style = { /pgf/number format/.cd, precision = 3, fixed },
+group style = {
+	group size = 1 by 3,
+},
+]
+\nextgroupplot[xmax = 23.69, ymin = -0.3, ymax = 0.33, ytick = {-0.2349, -0.16614, 0.089025, 0.27548}]
+\addplot table[x expr=\coordindex, y index=0] {generated/p1e2ir.csv};
+\nextgroupplot[xmax = 24.72, ymin = -0.35, ymax = 0.45, ytick = {-0.2887, 0.079006, 0.39688}]
+\addplot table[x expr=\coordindex, y index=0] {generated/p1e3ir.csv};
+\nextgroupplot[xmax = 16.48, ymin = -0.35, ymax = 0.45, ytick = {-0.27043, 0.089186, 0.36413}]
+\addplot table[x expr=\coordindex, y index=0] {generated/p1e4ir.csv};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Impulse responses for each example filter.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[continuous fr, height=3.5in, width=6.5in,
+% http://tex.stackexchange.com/questions/36442/aligning-subplots-in-a-pgfplots-figure
+yticklabel style={text width=2.35em,align=right},
+% http://tex.stackexchange.com/questions/51095/reduce-font-size-and-keep-label-position-in-bar-chart-using-pgf-tikz
+tick label style={font=\footnotesize},
+ylabel=$-20 \log_{10} \abs{H(F)}$,
+xmin = -0.53, xmax = 0.53,
+ymin = -85, ymax = 5,
+% http://tex.stackexchange.com/questions/54350/how-can-i-change-format-of-numbers-axis-on-pgfplots
+every y tick label/.append style = { /pgf/number format/.cd, precision = 3, fixed },
+legend pos = north east,
+]
+\addplot table[x expr=\coordindex/392 - 0.5, y index=0] {generated/p1e2mag.csv};
+\addlegendentry{Example 2}
+\addplot table[x expr=\coordindex/385 - 0.5, y index=0] {generated/p1e3mag.csv};
+\addlegendentry{Example 3}
+\addplot table[x expr=\coordindex/401 - 0.5, y index=0] {generated/p1e4mag.csv};
+\addlegendentry{Example 4}
+\end{axis}
+\end{tikzpicture}
+\caption{Bode plot of each filter.}
+\end{figure}
+
+
+
+
+\chapter{Project 2: GUI-Based Multi-Band Filter Design}%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\attempt}[3]{
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[continuous fr, height=3.5in, width=6.5in,
+% http://tex.stackexchange.com/questions/36442/aligning-subplots-in-a-pgfplots-figure
+yticklabel style={text width=2.35em,align=right},
+% http://tex.stackexchange.com/questions/51095/reduce-font-size-and-keep-label-position-in-bar-chart-using-pgf-tikz
+tick label style={font=\footnotesize},
+ylabel=$-20 \log_{10} \abs{H(F)}$,
+xmin = 0, xmax = 0.53,
+ymin = -85, ymax = 5,
+% http://tex.stackexchange.com/questions/54350/how-can-i-change-format-of-numbers-axis-on-pgfplots
+every y tick label/.append style = { /pgf/number format/.cd, precision = 3, fixed },
+legend pos = north east,
+]
+\addplot table[x expr=\coordindex/1000, y index=0] {generated/p2attempt#1.csv};
+\draw[dashed,gray,ultra thick] (axis cs:0,-40) -- (axis cs:0.5,-40);
+#3
+\end{axis}
+\end{tikzpicture}
+\caption{#2}
+\end{figure}
+}
+
+\attempt{1}{Bode plot of first attempt at designed filter. Note that it
+obviously does not meet stopband specs. To rememdy this, I will first try making
+passband 2 order 39.}{}
+
+\attempt{2}{Bode plot of second attempt at designed filter. There is one
+problematic sidelobe which I will mitigate by changing $A_\text{s} = 40\deci\bel
++ 1.131\deci\bel = 41.131\deci\bel$.}{
+\node[coordinate,pin=above right:{\color{red}Peak: $-38.69\deci\bel$}] at (axis cs:0.363,-38.686) {};
+}
+
+\attempt{3}{Third time's the charm! This filter meets specs.}{}
+
+
+\newpage
+\chapter{Appendix: MATLAB Source Code}
+
+What follows is a listing of the MATLAB source code (\autoref{lst:source-code})
+and the text output of this code (\autoref{lst:diary-txt}) used to generate the
+figures and other information presented in this report.
+
+\lstinputlisting[caption={The MATLAB script used for this report,
+\texttt{Lab10\_ahirzel.m}.},label={lst:source-code},style=MATLABcode]{Lab10_ahirzel.m}
+\lstinputlisting[caption={The output of listing \ref{lst:source-code}, \texttt{diary.txt}.},label={lst:diary-txt}]{generated/diary.txt}
+
+\end{document}

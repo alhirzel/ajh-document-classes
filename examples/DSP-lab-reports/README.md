@@ -38,3 +38,8 @@ Lab09_report_ahirzel.pdf, Lab09_report_ahirzel.tex
 --------------------------------------------------
 Another elegant set of Bode plots.
 
+Lab09_report_ahirzel.pdf, Lab09_report_ahirzel.tex
+--------------------------------------------------
+Bode plots with overplot and some impulse responses with non-trivial computed
+x-coordinates.
+
