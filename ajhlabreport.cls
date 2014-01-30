@@ -71,6 +71,9 @@ language=Matlab}
 \newcommand{\@datedue}{}
 \newcommand{\datedue}[1]{\renewcommand{\@datedue}{#1}}
 
+\newcommand{\@teaminfo}{}
+\newcommand{\teaminfo}[1]{\renewcommand{\@teaminfo}{#1}}
+
 \newcommand{\@submittedto}{}
 \newcommand{\submittedto}[1]{\renewcommand{\@submittedto}{#1}}
 
@@ -84,7 +87,7 @@ language=Matlab}
 	\vspace{0.25in}
 	{\noindent\Huge\@title} \par
 	\vspace{0.5in}
-	{\noindent\@author}\par
+	{\noindent\@author\@teaminfo} \par
 	\vspace{1in}
 	\noindent{}Submitted to \@submittedto{} for \@class{} \par
 	\vspace{1em}
