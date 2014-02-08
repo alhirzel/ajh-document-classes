@@ -71,6 +71,9 @@ language=Matlab}
 \newcommand{\@datedue}{}
 \newcommand{\datedue}[1]{\renewcommand{\@datedue}{#1}}
 
+\newcommand{\@authorphoto}{}
+\newcommand{\authorphoto}[1]{\renewcommand{\@authorphoto}{#1}}
+
 \newcommand{\@teaminfo}{}
 \newcommand{\teaminfo}[1]{\renewcommand{\@teaminfo}{#1}}
 
@@ -87,6 +90,8 @@ language=Matlab}
 	\vspace{0.25in}
 	{\noindent\Huge\@title} \par
 	\vspace{0.5in}
+	{\noindent\@authorphoto} \par
+	\vspace{0.25in}
 	{\noindent\@author\@teaminfo} \par
 	\vspace{1in}
 	\noindent{}Submitted to \@submittedto{} for \@class{} \par
